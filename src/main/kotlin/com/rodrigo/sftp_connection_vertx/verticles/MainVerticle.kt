@@ -1,9 +1,11 @@
-package com.rodrigo.sftp_connection_vertx
+package com.rodrigo.sftp_connection_vertx.verticles
 
-import io.netty.handler.codec.http.HttpResponseStatus
+import com.rodrigo.sftp_connection_vertx.services.ConnectionService
+import io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST
+import io.netty.handler.codec.http.HttpResponseStatus.OK
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Promise
-import io.vertx.core.http.HttpHeaders
+import io.vertx.core.http.HttpHeaders.CONTENT_TYPE
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
@@ -13,7 +15,7 @@ import org.slf4j.LoggerFactory
 
 class MainVerticle : AbstractVerticle() {
 
-    private val LOG = LoggerFactory.getLogger(MainVerticle::class.java)
+    private val logger = LoggerFactory.getLogger(MainVerticle::class.java)
 
     companion object {
         const val PORT = 8080
@@ -31,7 +33,7 @@ class MainVerticle : AbstractVerticle() {
             .listen(PORT) { http ->
                 if (http.succeeded()) {
                     startPromise.complete()
-                    LOG.info("HTTP server started on port ${http.result().actualPort()}")
+                    logger.info("HTTP server started on port ${http.result().actualPort()}")
                 } else {
                     startPromise.fail(http.cause());
                 }
@@ -42,20 +44,19 @@ class MainVerticle : AbstractVerticle() {
 
         vertx.executeBlocking<List<String>>({ promise ->
 
-            val files = Connection(vertx).download("/upload/examples/", "/tmp/uploads/")
+            val files = ConnectionService(vertx).download("/upload/examples/", "/tmp/uploads/")
 
             promise.complete(files)
         }, { ar ->
-
             if (ar.succeeded()) {
                 context.response()
-                    .setStatusCode(HttpResponseStatus.OK.code())
-                    .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                    .setStatusCode(OK.code())
+                    .putHeader(CONTENT_TYPE, APPLICATION_JSON)
                     .end(JsonArray(ar.result()).encode())
             } else {
                 context.response()
-                    .setStatusCode(HttpResponseStatus.BAD_REQUEST.code())
-                    .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                    .setStatusCode(BAD_REQUEST.code())
+                    .putHeader(CONTENT_TYPE, APPLICATION_JSON)
                     .end(JsonObject().put("error", ar.failed().toString()).encode())
             }
         })

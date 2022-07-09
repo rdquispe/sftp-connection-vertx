@@ -1,5 +1,6 @@
 package com.rodrigo.sftp_connection_vertx
 
+import com.rodrigo.sftp_connection_vertx.verticles.MainVerticle
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
 import org.slf4j.LoggerFactory
@@ -8,7 +9,7 @@ class Application {
 
     companion object {
 
-        private val LOG = LoggerFactory.getLogger(Application::class.java)
+        private val logger = LoggerFactory.getLogger(Application::class.java)
 
         @JvmStatic
         fun main(args: Array<String>) {
@@ -17,7 +18,7 @@ class Application {
 
             vertex.deployVerticle(mainVerticle, DeploymentOptions().apply {})
 
-            LOG.info("Application Success Running")
+            logger.info("Application Success Running")
         }
     }
 }

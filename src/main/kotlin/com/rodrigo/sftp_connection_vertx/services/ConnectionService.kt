@@ -1,4 +1,4 @@
-package com.rodrigo.sftp_connection_vertx
+package com.rodrigo.sftp_connection_vertx.services
 
 import com.jcraft.jsch.ChannelSftp
 import com.jcraft.jsch.ChannelSftp.LsEntry
@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory
 import java.util.Vector
 
 
-class Connection(private val vertx: Vertx) {
+class ConnectionService(private val vertx: Vertx) {
 
-    private val LOG = LoggerFactory.getLogger(Connection::class.java)
+    private val logger = LoggerFactory.getLogger(ConnectionService::class.java)
     private lateinit var channel: ChannelSftp
     private lateinit var session: Session
 
@@ -26,9 +26,9 @@ class Connection(private val vertx: Vertx) {
 
             val ssh = JSch()
 
-            session = ssh.getSession("<USERNAME>", "<HOST>", 22)
+            session = ssh.getSession("homestead", "20.124.158.44", 22)
             session.setConfig("StrictHostKeyChecking", "no")
-            session.setPassword("<PASSWORD>")
+            session.setPassword("secret")
             session.connect()
 
             channel = session.openChannel("sftp") as ChannelSftp
@@ -38,36 +38,40 @@ class Connection(private val vertx: Vertx) {
             val entries = channel.ls(".") as Vector<LsEntry>
 
             entries.forEach { entry ->
-                if (! entry.attrs.isDir) {
+                if (!entry.attrs.isDir) {
                     channel.get("$pathRemote${entry.filename}", "$pathLocal${entry.filename}")
                     files.add(entry.filename)
-                    LOG.info("Filename: {}, Size: {}", entry.filename, entry.attrs.size)
+                    logger.info("Filename: {}, Size: {}", entry.filename, entry.attrs.size)
                 }
             }
         } catch (ex: JSchException) {
-            LOG.error(ex.message.toString())
+            logger.error(ex.message.toString())
         } catch (ex: SftpException) {
-            LOG.error(ex.message.toString())
+            logger.error(ex.message.toString())
         } finally {
-            channel.disconnect()
-            session.disconnect()
+            disconnect()
         }
 
         return files
+    }
+
+    private fun disconnect() {
+        channel.disconnect()
+        session.disconnect()
     }
 
     private fun directory(path: String) {
         vertx.fileSystem()
             .exists(path) { ar ->
                 if (ar.result()) {
-                    LOG.warn("DIRECTORY_EXIST: {}", ar.result())
+                    logger.warn("DIRECTORY_EXIST: {}", ar.result())
                 } else {
                     vertx.fileSystem().let { fs ->
                         fs.mkdir(path) { result ->
                             if (result.succeeded()) {
-                                LOG.info("DIRECTORY_CREATED: $path")
+                                logger.info("DIRECTORY_CREATED: $path")
                             } else {
-                                LOG.error("DIRECTORY_ERROR: ${result.cause()}")
+                                logger.error("DIRECTORY_ERROR: ${result.cause()}")
                                 throw Exception("DIRECTORY_ERROR", result.cause())
                             }
                         }
