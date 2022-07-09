@@ -26,9 +26,9 @@ class Connection(private val vertx: Vertx) {
 
             val ssh = JSch()
 
-            session = ssh.getSession("homestead", "20.124.158.44", 22)
+            session = ssh.getSession("<USERNAME>", "<HOST>", 22)
             session.setConfig("StrictHostKeyChecking", "no")
-            session.setPassword("secret")
+            session.setPassword("<PASSWORD>")
             session.connect()
 
             channel = session.openChannel("sftp") as ChannelSftp
