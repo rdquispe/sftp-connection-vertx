@@ -56,9 +56,6 @@ class Connection(private val vertx: Vertx) {
         return files
     }
 
-    // connect
-    // disconnect
-
     private fun directory(path: String) {
         vertx.fileSystem()
             .exists(path) { ar ->
