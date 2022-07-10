@@ -1,6 +1,5 @@
 package com.rodrigo.sftp_connection_vertx
 
-import com.rodrigo.sftp_connection_vertx.verticles.MainVerticle
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
 import org.slf4j.LoggerFactory

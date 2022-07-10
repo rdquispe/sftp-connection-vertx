@@ -1,6 +1,5 @@
-package com.rodrigo.sftp_connection_vertx.verticles
+package com.rodrigo.sftp_connection_vertx
 
-import com.rodrigo.sftp_connection_vertx.services.ConnectionService
 import io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST
 import io.netty.handler.codec.http.HttpResponseStatus.OK
 import io.vertx.core.AbstractVerticle
@@ -44,7 +43,7 @@ class MainVerticle : AbstractVerticle() {
 
         vertx.executeBlocking<List<String>>({ promise ->
 
-            val files = ConnectionService(vertx).download("/upload/examples/", "/tmp/uploads/")
+            val files = Connection(vertx).download("/upload/examples/", "/tmp/uploads/")
 
             promise.complete(files)
         }, { ar ->

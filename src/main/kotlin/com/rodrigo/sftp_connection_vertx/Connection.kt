@@ -1,4 +1,4 @@
-package com.rodrigo.sftp_connection_vertx.services
+package com.rodrigo.sftp_connection_vertx
 
 import com.jcraft.jsch.ChannelSftp
 import com.jcraft.jsch.ChannelSftp.LsEntry
@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory
 import java.util.Vector
 
 
-class ConnectionService(private val vertx: Vertx) {
+class Connection(private val vertx: Vertx) {
 
-    private val logger = LoggerFactory.getLogger(ConnectionService::class.java)
+    private val logger = LoggerFactory.getLogger(Connection::class.java)
     private lateinit var channel: ChannelSftp
     private lateinit var session: Session
 
@@ -26,9 +26,9 @@ class ConnectionService(private val vertx: Vertx) {
 
             val ssh = JSch()
 
-            session = ssh.getSession("homestead", "20.124.158.44", 22)
+            session = ssh.getSession("<USERNAME>", "<HOST>", 22)
             session.setConfig("StrictHostKeyChecking", "no")
-            session.setPassword("secret")
+            session.setPassword("<PASSWORD>")
             session.connect()
 
             channel = session.openChannel("sftp") as ChannelSftp
@@ -62,12 +62,12 @@ class ConnectionService(private val vertx: Vertx) {
 
     private fun directory(path: String) {
         vertx.fileSystem()
-            .exists(path) { ar ->
-                if (ar.result()) {
-                    logger.warn("DIRECTORY_EXIST: {}", ar.result())
+            .exists(path) { asyncResult ->
+                if (asyncResult.result()) {
+                    logger.warn("DIRECTORY_EXIST: {}", asyncResult.result())
                 } else {
-                    vertx.fileSystem().let { fs ->
-                        fs.mkdir(path) { result ->
+                    vertx.fileSystem().let { fileSystem ->
+                        fileSystem.mkdir(path) { result ->
                             if (result.succeeded()) {
                                 logger.info("DIRECTORY_CREATED: $path")
                             } else {

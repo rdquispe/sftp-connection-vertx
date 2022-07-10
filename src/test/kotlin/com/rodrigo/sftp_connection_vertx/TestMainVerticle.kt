@@ -1,6 +1,5 @@
 package com.rodrigo.sftp_connection_vertx
 
-import com.rodrigo.sftp_connection_vertx.verticles.MainVerticle
 import io.vertx.core.Vertx
 import io.vertx.junit5.VertxExtension
 import io.vertx.junit5.VertxTestContext
